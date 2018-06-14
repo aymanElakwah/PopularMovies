@@ -31,11 +31,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
     private static final String PAGE_INDEX_KEY = "page_index_key";
     private boolean sortByPopular;
     private MainActivity mainActivity;
+    private NetworkUtils networkUtils;
 
     public MyAdapter(ListItemClickListener listener, MainActivity mainActivity) {
         size = 0;
         this.listener = listener;
         this.mainActivity = mainActivity;
+        networkUtils = new NetworkUtils(mainActivity);
     }
 
     public void appendList(ArrayList<Movie> movies) {
@@ -154,6 +156,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
         page--;
         mainActivity.showErrorMessage();
 
+    }
+
+    public NetworkUtils getNetworkUtils() {
+        return networkUtils;
     }
 
     public void tryAgain() {

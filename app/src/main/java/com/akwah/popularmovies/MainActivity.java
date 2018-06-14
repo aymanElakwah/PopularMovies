@@ -16,8 +16,8 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ListIte
 
     private RecyclerView mRecyclerView;
     private MyAdapter myAdapter;
-    private View noInternetLayout;
-    private Button tryAgain;
+    private View mNoInternetLayout;
+    private Button mTryAgain;
 
 
     @Override
@@ -30,9 +30,9 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ListIte
         mRecyclerView.setHasFixedSize(true);
         myAdapter = new MyAdapter(this, this);
         mRecyclerView.setAdapter(myAdapter);
-        noInternetLayout = findViewById(R.id.no_internet_layout);
-        tryAgain = (Button) findViewById(R.id.try_again_button);
-        tryAgain.setOnClickListener(new View.OnClickListener() {
+        mNoInternetLayout = findViewById(R.id.no_internet_layout);
+        mTryAgain = (Button) findViewById(R.id.try_again_button);
+        mTryAgain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 myAdapter.tryAgain();
@@ -70,11 +70,11 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ListIte
     }
 
     public void showErrorMessage() {
-        noInternetLayout.setVisibility(View.VISIBLE);
+        mNoInternetLayout.setVisibility(View.VISIBLE);
     }
 
     public void hideErrorMessage() {
-        noInternetLayout.setVisibility(View.GONE);
+        mNoInternetLayout.setVisibility(View.GONE);
     }
 
     @Override

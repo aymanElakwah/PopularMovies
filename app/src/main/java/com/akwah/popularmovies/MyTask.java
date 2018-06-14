@@ -21,7 +21,7 @@ public class MyTask extends AsyncTask<URL, Void, ArrayList<Movie>> {
 
     @Override
     protected ArrayList<Movie> doInBackground(URL... url) {
-        String json = NetworkUtils.getResponseFromHttp(url[0]);
+        String json = myAdapter.getNetworkUtils().getResponseFromHttp(url[0]);
         if (json != null)
             return JSONParse.parseJSON(json);
         return null;

@@ -1,7 +1,12 @@
 package com.akwah.popularmovies.utils;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
+
+import com.akwah.popularmovies.BuildConfig;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -14,17 +19,21 @@ import java.util.Scanner;
  */
 
 public class NetworkUtils {
-    private static final String KEY = "######################################";
-    private static final String BASE_URL = "http://api.themoviedb.org/3/discover/movie";
-    private static final String SORT_BY_POPULAR = "popularity.desc";
-    private static final String SORT_BY_TOP_RATED = "vote_average.desc";
-    private static final String SORT_BY_PARAM = "sort_by";
+    private static final String KEY = BuildConfig.MY_API_KEY;
+    private static final String BASE_URL = "http://api.themoviedb.org/3/movie";
+    private static final String SORT_BY_POPULAR = "popular";
+    private static final String SORT_BY_TOP_RATED = "top_rated";
     private static final String KEY_PARAM = "api_key";
     private static final String PAGE_PARAM = "page";
+    private ConnectivityManager connectivityManager;
+
+    public NetworkUtils(Context context) {
+        this.connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    }
 
     public static URL getURL(int page, boolean sortByPopular) {
         try {
-            Uri uri = Uri.parse(BASE_URL).buildUpon().appendQueryParameter(SORT_BY_PARAM, sortByPopular ? SORT_BY_POPULAR : SORT_BY_TOP_RATED).appendQueryParameter(KEY_PARAM, KEY).appendQueryParameter(PAGE_PARAM, String.valueOf(page)).build();
+            Uri uri = Uri.parse(BASE_URL).buildUpon().appendPath(sortByPopular ? SORT_BY_POPULAR : SORT_BY_TOP_RATED).appendQueryParameter(KEY_PARAM, KEY).appendQueryParameter(PAGE_PARAM, String.valueOf(page)).build();
             URL url = new URL(uri.toString());
             return url;
         } catch (MalformedURLException e) {
@@ -33,7 +42,9 @@ public class NetworkUtils {
         }
     }
 
-    public static String getResponseFromHttp(URL url) {
+    public String getResponseFromHttp(URL url) {
+        if(!isConnected())
+            return null;
         HttpURLConnection connection = null;
         try {
             connection = (HttpURLConnection) url.openConnection();
@@ -48,5 +59,10 @@ public class NetworkUtils {
             if (connection != null)
                 connection.disconnect();
         }
+    }
+
+    private boolean isConnected() {
+        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 }
