@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/item_padding">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@color/frameColor"
+        android:padding="@dimen/frame_thickness">
+
+        <ImageView
+            android:id="@+id/poster_image"
+            android:layout_width="@dimen/image_width"
+            android:layout_height="@dimen/image_height"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop" />
+
+        <ImageView
+            android:id="@+id/movie_title_background"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="fitXY"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/poster_image"
+            app:layout_constraintStart_toStartOf="@+id/poster_image"
+            app:layout_constraintTop_toTopOf="@+id/movie_title"
+            app:srcCompat="@drawable/movie_title_background" />
+
+        <TextView
+            android:id="@+id/movie_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="@dimen/movie_title_padding"
+            android:textAppearance="@style/TextAppearance.AppCompat"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/movie_title_text_size"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/poster_image"
+            app:layout_constraintEnd_toEndOf="@+id/poster_image"
+            app:layout_constraintStart_toStartOf="@+id/poster_image"
+            tools:text="Minions" />
+
+    </android.support.constraint.ConstraintLayout>
+</FrameLayout>
