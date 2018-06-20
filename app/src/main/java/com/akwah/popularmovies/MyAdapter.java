@@ -31,13 +31,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
     private static final String PAGE_INDEX_KEY = "page_index_key";
     private boolean sortByPopular;
     private MainActivity mainActivity;
-    private NetworkUtils networkUtils;
+    private final QueryData queryData;
 
     public MyAdapter(ListItemClickListener listener, MainActivity mainActivity) {
         size = 0;
         this.listener = listener;
         this.mainActivity = mainActivity;
-        networkUtils = new NetworkUtils(mainActivity);
+        queryData = new QueryData(mainActivity, this, mainActivity.getSupportLoaderManager());
     }
 
     public void appendList(ArrayList<Movie> movies) {
@@ -45,13 +45,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
         if (this.movies == null) {
             this.movies = new ArrayList<>();
             size = 0;
-            if(movies == null) notifyDataSetChanged();
+            if (movies == null) notifyDataSetChanged();
         }
         if (movies != null) {
             this.movies.addAll(movies);
             size += movies.size();
             mainActivity.hideErrorMessage();
             notifyDataSetChanged();
+        } else {
+            noInternetConnection();
         }
     }
 
@@ -67,7 +69,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
         holder.bind(movies.get(position));
         if (position == getItemCount() - 1) {
             if (page < MAX_PAGE)
-                new MyTask(this).execute(NetworkUtils.getURL(page++, sortByPopular));
+                queryData.assignLoader(NetworkUtils.getURLString(page++, sortByPopular));
         }
     }
 
@@ -82,7 +84,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
         private ImageView mPosterImage;
         private Context context;
 
-        public PosterViewHolder(View itemView) {
+        private PosterViewHolder(View itemView) {
             super(itemView);
             context = itemView.getContext();
             mTitle = (TextView) itemView.findViewById(R.id.movie_title);
@@ -90,7 +92,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
             itemView.setOnClickListener(this);
         }
 
-        public void bind(Movie movie) {
+        private void bind(Movie movie) {
             mTitle.setText(movie.getTitle());
             // http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
             Picasso.with(context).load(movie.getImageURL()).error(R.drawable.error).into(mPosterImage);
@@ -110,19 +112,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
     }
 
     public void onCreate(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            sortByPopular = savedInstanceState.getBoolean(SORT_BY_KEY, true);
-            page = savedInstanceState.getInt(PAGE_INDEX_KEY, 2);
-        } else {
+        if (savedInstanceState == null || !savedInstanceState.containsKey(MOVIE_LIST_KEY)) {
             sortByPopular = true;
             page = 2;
-        }
-        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_LIST_KEY)) {
-            movies = savedInstanceState.getParcelableArrayList(MOVIE_LIST_KEY);
-            size = movies.size();
-            notifyDataSetChanged();
+            queryData.assignLoader(NetworkUtils.getURLString(1, true));
         } else {
-            new MyTask(this).execute(NetworkUtils.getURL(1, sortByPopular));
+            sortByPopular = savedInstanceState.getBoolean(SORT_BY_KEY, true);
+            page = savedInstanceState.getInt(PAGE_INDEX_KEY, 2);
+            movies = savedInstanceState.getParcelableArrayList(MOVIE_LIST_KEY);
+            size = movies == null ? 0 : movies.size();
+            if(size == 0) {
+                page = 1;
+                mainActivity.showErrorMessage();
+            }
+            notifyDataSetChanged();
         }
     }
 
@@ -144,7 +147,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
         movies.clear();
         size = 0;
         notifyDataSetChanged();
-        new MyTask(this).execute(NetworkUtils.getURL(1, sortByPopular));
+        queryData.assignLoader(NetworkUtils.getURLString(1, sortByPopular));
         page = 2;
     }
 
@@ -152,18 +155,22 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
         return sortByPopular;
     }
 
-    public void noInternetConnection() {
+    private void noInternetConnection() {
         page--;
         mainActivity.showErrorMessage();
 
     }
 
-    public NetworkUtils getNetworkUtils() {
-        return networkUtils;
+    public void tryAgain() {
+        queryData.assignLoader(NetworkUtils.getURLString(page++, sortByPopular));
     }
 
-    public void tryAgain() {
-        new MyTask(this).execute(NetworkUtils.getURL(page++, sortByPopular));
+    public void showLoading() {
+        mainActivity.showLoading();
+    }
+
+    public void hideLoading() {
+        mainActivity.hideLoading();
     }
 
     public interface ListItemClickListener {

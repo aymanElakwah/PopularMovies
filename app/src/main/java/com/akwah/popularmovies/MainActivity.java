@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 public class MainActivity extends AppCompatActivity implements MyAdapter.ListItemClickListener {
 
@@ -18,7 +19,8 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ListIte
     private MyAdapter myAdapter;
     private View mNoInternetLayout;
     private Button mTryAgain;
-
+    private ProgressBar mProgressBar;
+    private ProgressBar mLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,9 +37,13 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ListIte
         mTryAgain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mTryAgain.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.VISIBLE);
                 myAdapter.tryAgain();
             }
         });
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mLoading = (ProgressBar) findViewById(R.id.loading);
         myAdapter.onCreate(savedInstanceState);
     }
 
@@ -70,11 +76,21 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ListIte
     }
 
     public void showErrorMessage() {
+        mProgressBar.setVisibility(View.GONE);
+        mTryAgain.setVisibility(View.VISIBLE);
         mNoInternetLayout.setVisibility(View.VISIBLE);
     }
 
     public void hideErrorMessage() {
         mNoInternetLayout.setVisibility(View.GONE);
+    }
+
+    public void showLoading() {
+        mLoading.setVisibility(View.VISIBLE);
+    }
+
+    public void hideLoading() {
+        mLoading.setVisibility(View.GONE);
     }
 
     @Override

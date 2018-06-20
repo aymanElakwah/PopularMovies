@@ -11,6 +11,15 @@
         android:layout_height="wrap_content"
         android:background="@color/background" />
 
+    <ProgressBar
+        android:id="@+id/loading"
+        style="@android:style/Widget.Holo.Light.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:indeterminate="true"
+        android:layout_gravity="bottom"/>
+
     <include
         android:id="@+id/no_internet_layout"
         layout="@layout/no_internet_connection"

@@ -25,25 +25,22 @@ public class NetworkUtils {
     private static final String SORT_BY_TOP_RATED = "top_rated";
     private static final String KEY_PARAM = "api_key";
     private static final String PAGE_PARAM = "page";
-    private ConnectivityManager connectivityManager;
 
-    public NetworkUtils(Context context) {
-        this.connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    public static String getURLString(int page, boolean sortByPopular) {
+        return Uri.parse(BASE_URL).buildUpon().appendPath(sortByPopular ? SORT_BY_POPULAR : SORT_BY_TOP_RATED).appendQueryParameter(KEY_PARAM, KEY).appendQueryParameter(PAGE_PARAM, String.valueOf(page)).build().toString();
     }
 
     public static URL getURL(int page, boolean sortByPopular) {
         try {
-            Uri uri = Uri.parse(BASE_URL).buildUpon().appendPath(sortByPopular ? SORT_BY_POPULAR : SORT_BY_TOP_RATED).appendQueryParameter(KEY_PARAM, KEY).appendQueryParameter(PAGE_PARAM, String.valueOf(page)).build();
-            URL url = new URL(uri.toString());
-            return url;
+            return new URL(getURLString(page, sortByPopular));
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public String getResponseFromHttp(URL url) {
-        if(!isConnected())
+    public static String getResponseFromHttp(URL url, Context context) {
+        if (!isConnected(context))
             return null;
         HttpURLConnection connection = null;
         try {
@@ -61,7 +58,10 @@ public class NetworkUtils {
         }
     }
 
-    private boolean isConnected() {
+    private static boolean isConnected(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager == null)
+            return false;
         NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
