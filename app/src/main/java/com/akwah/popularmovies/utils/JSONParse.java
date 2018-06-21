@@ -13,6 +13,7 @@ import java.util.ArrayList;
  */
 
 public class JSONParse {
+    private static final String ID = "id";
     private static final String RESULTS = "results";
     private static final String POSTER_PATH = "poster_path";
     private static final String TITLE = "original_title";
@@ -28,12 +29,13 @@ public class JSONParse {
             JSONObject element;
             for (int i = 0; i < results.length(); i++) {
                 element = (JSONObject) results.get(i);
+                int id = element.optInt(ID);
                 String imageURL = element.optString(POSTER_PATH);
                 String title = element.optString(TITLE);
                 String overview = element.optString(OVERVIEW);
                 float rating = (float) element.optDouble(VOTE);
                 String date = element.optString(DATE);
-                movies.add(new Movie(title, imageURL, overview, rating, date));
+                movies.add(new Movie(id, title, imageURL, overview, rating, date));
             }
             return movies;
         } catch (JSONException ex) {

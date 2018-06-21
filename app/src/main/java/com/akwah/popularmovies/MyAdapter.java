@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.akwah.popularmovies.data.DBHelper;
 import com.akwah.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
@@ -21,7 +22,6 @@ import java.util.ArrayList;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> {
 
-    private int size;
     private ListItemClickListener listener;
     private ArrayList<Movie> movies;
     private static final int MAX_PAGE = 1000;
@@ -29,27 +29,25 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
     private static final String MOVIE_LIST_KEY = "movie_list_key";
     private static final String SORT_BY_KEY = "sort_by";
     private static final String PAGE_INDEX_KEY = "page_index_key";
+    private static final String SHOWING_FAV_KEY = "showing_favourites";
+    private boolean showingFavourites;
     private boolean sortByPopular;
     private MainActivity mainActivity;
     private final QueryData queryData;
 
     public MyAdapter(ListItemClickListener listener, MainActivity mainActivity) {
-        size = 0;
         this.listener = listener;
         this.mainActivity = mainActivity;
         queryData = new QueryData(mainActivity, this, mainActivity.getSupportLoaderManager());
     }
 
     public void appendList(ArrayList<Movie> movies) {
-        int oldSize = size;
         if (this.movies == null) {
             this.movies = new ArrayList<>();
-            size = 0;
             if (movies == null) notifyDataSetChanged();
         }
         if (movies != null) {
             this.movies.addAll(movies);
-            size += movies.size();
             mainActivity.hideErrorMessage();
             notifyDataSetChanged();
         } else {
@@ -67,7 +65,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
     public void onBindViewHolder(PosterViewHolder holder, int position) {
         Log.d("POSITION", position + "");
         holder.bind(movies.get(position));
-        if (position == getItemCount() - 1) {
+        if (!showingFavourites && position == getItemCount() - 1) {
             if (page < MAX_PAGE)
                 queryData.assignLoader(NetworkUtils.getURLString(page++, sortByPopular));
         }
@@ -75,7 +73,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
 
     @Override
     public int getItemCount() {
-        return size;
+        if (movies != null)
+            return movies.size();
+        return 0;
     }
 
     public class PosterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -101,27 +101,29 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
         @Override
         public void onClick(View view) {
             int position = getAdapterPosition();
-            listener.onClick(movies.get(position));
+            listener.onClick(movies.get(position), position);
         }
     }
 
     public void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList(MOVIE_LIST_KEY, movies);
+        outState.putBoolean(SHOWING_FAV_KEY, showingFavourites);
         outState.putBoolean(SORT_BY_KEY, sortByPopular);
         outState.putInt(PAGE_INDEX_KEY, page);
     }
 
     public void onCreate(Bundle savedInstanceState) {
         if (savedInstanceState == null || !savedInstanceState.containsKey(MOVIE_LIST_KEY)) {
+            showingFavourites = false;
             sortByPopular = true;
             page = 2;
             queryData.assignLoader(NetworkUtils.getURLString(1, true));
         } else {
+            showingFavourites = savedInstanceState.getBoolean(SHOWING_FAV_KEY, false);
             sortByPopular = savedInstanceState.getBoolean(SORT_BY_KEY, true);
             page = savedInstanceState.getInt(PAGE_INDEX_KEY, 2);
             movies = savedInstanceState.getParcelableArrayList(MOVIE_LIST_KEY);
-            size = movies == null ? 0 : movies.size();
-            if(size == 0) {
+            if (!showingFavourites && getItemCount() == 0) {
                 page = 1;
                 mainActivity.showErrorMessage();
             }
@@ -130,22 +132,31 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
     }
 
     public void sortByPopular() {
-        if (sortByPopular)
+        if (sortByPopular && !showingFavourites)
             return;
         sortByPopular = true;
         sort();
     }
 
     public void sortByTopRated() {
-        if (!sortByPopular)
+        if (!sortByPopular && !showingFavourites)
             return;
         sortByPopular = false;
         sort();
     }
 
+    public void showFavourites() {
+        if (showingFavourites)
+            return;
+        mainActivity.hideErrorMessage();
+        showingFavourites = true;
+        movies = MainActivity.getDataBase().getFavouriteMovies();
+        notifyDataSetChanged();
+    }
+
     private void sort() {
+        showingFavourites = false;
         movies.clear();
-        size = 0;
         notifyDataSetChanged();
         queryData.assignLoader(NetworkUtils.getURLString(1, sortByPopular));
         page = 2;
@@ -153,6 +164,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
 
     public boolean getSortByPopular() {
         return sortByPopular;
+    }
+
+    public boolean isShowingFavourites() {
+        return showingFavourites;
     }
 
     private void noInternetConnection() {
@@ -173,7 +188,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
         mainActivity.hideLoading();
     }
 
+    public void removeMovie(int index) {
+        if (index < 0)
+            return;
+        if (showingFavourites) {
+            movies.remove(index);
+            notifyDataSetChanged();
+        }
+    }
+
     public interface ListItemClickListener {
-        public void onClick(Movie movie);
+        public void onClick(Movie movie, int index);
     }
 }

@@ -9,13 +9,15 @@ import android.os.Parcelable;
 
 public class Movie implements Parcelable {
     private static final String BASE_URL = "http://image.tmdb.org/t/p/w185/";
-    private String title;
-    private String imageURL;
-    private String overview;
-    private float rating;
-    private String releaseDate;
+    private final int ID;
+    private final String title;
+    private final String imageURL;
+    private final String overview;
+    private final float rating;
+    private final String releaseDate;
 
-    public Movie(String title, String imageURL, String overview, float rating, String releaseDate) {
+    public Movie(int ID, String title, String imageURL, String overview, float rating, String releaseDate) {
+        this.ID = ID;
         this.title = title;
         this.imageURL = imageURL;
         this.overview = overview;
@@ -24,11 +26,16 @@ public class Movie implements Parcelable {
     }
 
     private Movie(Parcel parcel) {
+        ID = parcel.readInt();
         title = parcel.readString();
         imageURL = parcel.readString();
         overview = parcel.readString();
         rating = parcel.readFloat();
         releaseDate = parcel.readString();
+    }
+
+    public int getID() {
+        return ID;
     }
 
     public String getTitle() {
@@ -37,6 +44,10 @@ public class Movie implements Parcelable {
 
     public String getImageURL() {
         return BASE_URL + imageURL;
+    }
+
+    public String getAbsoluteImageURL() {
+        return imageURL;
     }
 
     public String getOverview() {
@@ -58,6 +69,7 @@ public class Movie implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(ID);
         parcel.writeString(title);
         parcel.writeString(imageURL);
         parcel.writeString(overview);

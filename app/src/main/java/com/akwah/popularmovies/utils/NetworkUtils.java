@@ -40,6 +40,7 @@ public class NetworkUtils {
     }
 
     public static String getResponseFromHttp(URL url, Context context) {
+        Log.d("AYMAN", url.toString());
         if (!isConnected(context))
             return null;
         HttpURLConnection connection = null;

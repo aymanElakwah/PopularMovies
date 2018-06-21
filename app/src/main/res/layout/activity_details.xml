@@ -25,12 +25,12 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:adjustViewBounds="true"
-            android:cropToPadding="false"
             android:maxHeight="@dimen/image_height"
             android:maxWidth="@dimen/image_width"
             app:layout_constraintEnd_toStartOf="@+id/guideline"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/error" />
 
         <include
             android:id="@+id/main_details"
