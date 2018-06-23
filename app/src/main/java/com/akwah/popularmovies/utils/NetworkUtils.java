@@ -1,6 +1,8 @@
 package com.akwah.popularmovies.utils;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -25,14 +27,28 @@ public class NetworkUtils {
     private static final String SORT_BY_TOP_RATED = "top_rated";
     private static final String KEY_PARAM = "api_key";
     private static final String PAGE_PARAM = "page";
+    private static final String VIDEOS = "videos";
+    private static final String REVIEWS = "reviews";
 
     public static String getURLString(int page, boolean sortByPopular) {
         return Uri.parse(BASE_URL).buildUpon().appendPath(sortByPopular ? SORT_BY_POPULAR : SORT_BY_TOP_RATED).appendQueryParameter(KEY_PARAM, KEY).appendQueryParameter(PAGE_PARAM, String.valueOf(page)).build().toString();
     }
 
+    public static URL getTrailerURL(int movieID) {
+        return toURL(Uri.parse(BASE_URL).buildUpon().appendPath(movieID + "").appendPath(VIDEOS).appendQueryParameter(KEY_PARAM, KEY).build().toString());
+    }
+
+    public static URL getReviewsURL(int movieID) {
+        return toURL(Uri.parse(BASE_URL).buildUpon().appendPath(movieID + "").appendPath(REVIEWS).appendQueryParameter(KEY_PARAM, KEY).build().toString());
+    }
+
     public static URL getURL(int page, boolean sortByPopular) {
+        return toURL(getURLString(page, sortByPopular));
+    }
+
+    private static URL toURL(String url) {
         try {
-            return new URL(getURLString(page, sortByPopular));
+            return new URL(url);
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return null;
@@ -59,11 +75,21 @@ public class NetworkUtils {
         }
     }
 
-    private static boolean isConnected(Context context) {
+    public static boolean isConnected(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager == null)
             return false;
         NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
+
+    public static void watchYoutubeVideo(Context context, String id) {
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
+        Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + id));
+        try {
+            context.startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            context.startActivity(webIntent);
+        }
     }
 }

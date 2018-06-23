@@ -87,8 +87,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
         private PosterViewHolder(View itemView) {
             super(itemView);
             context = itemView.getContext();
-            mTitle = (TextView) itemView.findViewById(R.id.movie_title);
-            mPosterImage = (ImageView) itemView.findViewById(R.id.poster_image);
+            mTitle = itemView.findViewById(R.id.movie_title);
+            mPosterImage = itemView.findViewById(R.id.poster_image);
             itemView.setOnClickListener(this);
         }
 
@@ -198,6 +198,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
     }
 
     public interface ListItemClickListener {
-        public void onClick(Movie movie, int index);
+        void onClick(Movie movie, int index);
     }
 }

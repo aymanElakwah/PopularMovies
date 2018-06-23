@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.akwah.popularmovies.data.DBHelper;
+import com.akwah.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 public class DetailsActivity extends AppCompatActivity {
@@ -23,11 +26,6 @@ public class DetailsActivity extends AppCompatActivity {
     public static final String INDEX_KEY = "index_key";
     private static final int STAR_ON = android.R.drawable.star_big_on;
     private static final int STAR_OFF = android.R.drawable.star_big_off;
-    private ImageView mPosterImage;
-    private TextView mTitle;
-    private RatingBar mRatingBar;
-    private TextView mReleaseDate;
-    private TextView mOverview;
     private MenuItem mStar;
     private boolean favourite;
     private SharedPreferences sharedPreferences;
@@ -36,6 +34,8 @@ public class DetailsActivity extends AppCompatActivity {
     public static final String DATA_KEY = "data_key";
     private Intent data;
     private int movieIndex;
+    private TextView mTrailers;
+    private TextView mReviews;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,11 +44,11 @@ public class DetailsActivity extends AppCompatActivity {
         if (intent == null || !intent.hasExtra(INDEX_KEY))
             finish();
         setContentView(R.layout.activity_details);
-        mPosterImage = (ImageView) findViewById(R.id.details_poster_image);
-        mTitle = (TextView) findViewById(R.id.movie_title);
-        mRatingBar = (RatingBar) findViewById(R.id.ratingBar);
-        mReleaseDate = (TextView) findViewById(R.id.release_date);
-        mOverview = (TextView) findViewById(R.id.overview_text);
+        ImageView mPosterImage = findViewById(R.id.details_poster_image);
+        TextView mTitle = findViewById(R.id.movie_title);
+        RatingBar mRatingBar = findViewById(R.id.ratingBar);
+        TextView mReleaseDate = findViewById(R.id.release_date);
+        TextView mOverview = findViewById(R.id.overview_text);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         movie = intent.getParcelableExtra(INDEX_KEY);
         Picasso.with(this).load(movie.getImageURL()).placeholder(R.drawable.progress_animation).error(R.drawable.error).into(mPosterImage);
@@ -59,6 +59,21 @@ public class DetailsActivity extends AppCompatActivity {
         favourite = sharedPreferences.getBoolean(movie.getID() + "", false);
         data = new Intent();
         movieIndex = intent.getIntExtra(DATA_KEY, -1);
+        //Trailers and Reviews
+        mTrailers = findViewById(R.id.trailer_label);
+        mReviews = findViewById(R.id.reviews_label);
+        if(NetworkUtils.isConnected(this)) {
+            RecyclerView trailers = findViewById(R.id.trailers_rv);
+            trailers.setHasFixedSize(true);
+            trailers.setAdapter(new TrailersAdaptor(this, movie.getID()));
+            LinearLayoutManager trailersLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+            trailers.setLayoutManager(trailersLayoutManager);
+            RecyclerView reviews = findViewById(R.id.reviews_rv);
+            reviews.setAdapter(new ReviewsAdapter(this, movie.getID()));
+            LinearLayoutManager reviewsLayoutManager = new LinearLayoutManager(this);
+            reviews.setLayoutManager(reviewsLayoutManager);
+            reviews.setNestedScrollingEnabled(false);
+        }
     }
 
     @Override
@@ -100,6 +115,14 @@ public class DetailsActivity extends AppCompatActivity {
             return;
         mStar.setChecked(favourite);
         mStar.setIcon(favourite ? STAR_ON : STAR_OFF);
+    }
+
+    public void showTrailer() {
+        mTrailers.setVisibility(View.VISIBLE);
+    }
+
+    public void showReviews() {
+        mReviews.setVisibility(View.VISIBLE);
     }
 
 }

@@ -9,4 +9,6 @@
     <string name="add_to_favourite_toast">has been added to favourites</string>
     <string name="my_favourites">My Favourites</string>
     <string name="remove_from_favourite_toast">has been removed from favourites</string>
+    <string name="trailers">Trailers</string>
+    <string name="reviews">Reviews</string>
 </resources>

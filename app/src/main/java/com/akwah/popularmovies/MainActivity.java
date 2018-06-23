@@ -31,14 +31,14 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ListIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mDB = new DBHelper(this);
-        mRecyclerView = (RecyclerView) findViewById(R.id.posters_rv);
+        mRecyclerView = findViewById(R.id.posters_rv);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, getSpanCount());
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mRecyclerView.setHasFixedSize(true);
         myAdapter = new MyAdapter(this, this);
         mRecyclerView.setAdapter(myAdapter);
         mNoInternetLayout = findViewById(R.id.no_internet_layout);
-        mTryAgain = (Button) findViewById(R.id.try_again_button);
+        mTryAgain = findViewById(R.id.try_again_button);
         mTryAgain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -47,8 +47,8 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ListIte
                 myAdapter.tryAgain();
             }
         });
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mLoading = (ProgressBar) findViewById(R.id.loading);
+        mProgressBar = findViewById(R.id.progressBar);
+        mLoading = findViewById(R.id.loading);
         myAdapter.onCreate(savedInstanceState);
     }
 
