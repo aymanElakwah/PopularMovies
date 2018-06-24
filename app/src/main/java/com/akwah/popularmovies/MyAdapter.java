@@ -127,6 +127,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.PosterViewHolder> 
                 page = 1;
                 mainActivity.showErrorMessage();
             }
+            if(showingFavourites)
+                mainActivity.setTitle(mainActivity.getString(R.string.my_favourites));
+            else if(sortByPopular)
+                mainActivity.setTitle(mainActivity.getString(R.string.sort_by_popular));
+            else
+                mainActivity.setTitle(mainActivity.getString(R.string.sort_by_top_rated));
             notifyDataSetChanged();
         }
     }
